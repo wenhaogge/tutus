@@ -1,0 +1,7 @@
+{
+  "name": "tutus", "main": "src/worker/index.ts", "compatibility_date": "2026-07-30",
+  "assets": {"directory": "dist/client", "binding": "ASSETS", "not_found_handling": "single-page-application", "run_worker_first": ["/api/*", "/files/*", "/s", "/s/*"]},
+  "d1_databases": [{"binding": "DB", "database_name": "tutus", "database_id": "REPLACE_WITH_YOUR_NEW_DATABASE_ID"}],
+  "r2_buckets": [{"binding": "FILES", "bucket_name": "REPLACE_WITH_YOUR_NEW_PRIVATE_BUCKET"}],
+  "triggers": {"crons": ["17 3 * * *"]}
+}
