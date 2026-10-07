@@ -35,7 +35,7 @@ pnpm dev
 
 ## 部署到 Cloudflare
 
-仓库中的 `wrangler.jsonc` 是部署模板。先新建 D1 和私有 R2，再填入对应配置；上传代码不会自动创建资源或部署。
+仓库中的 `wrangler.jsonc` 是脱敏模板。先新建 D1 和私有 R2，再将模板复制为 `wrangler.local.jsonc`，把实际资源标识填入这份本地配置。该文件不会提交到 Git。下面的初始化步骤仅用于新实例。
 
 ```sh
 pnpm install --frozen-lockfile
@@ -45,14 +45,14 @@ pnpm exec wrangler d1 create tutus
 pnpm exec wrangler r2 bucket create tutus-files
 ```
 
-将新建 D1 的 `database_id` 和 R2 的 `bucket_name` 填入 `wrangler.jsonc`。如果资源名称不同，也要更新 `database_name`。保留绑定名称 `DB`、`FILES` 和 `ASSETS`。
+将新建 D1 的 `database_id` 和 R2 的 `bucket_name` 填入 `wrangler.local.jsonc`。如果资源名称不同，也要更新 `database_name`。保留绑定名称 `DB`、`FILES` 和 `ASSETS`。
 
 仅对新建的空数据库执行初始化：
 
 ```sh
-pnpm exec wrangler d1 execute tutus --remote --file schema.sql
-pnpm exec wrangler secret put SETUP_SECRET
-pnpm exec wrangler deploy
+pnpm exec wrangler d1 execute tutus --remote --file schema.sql --config wrangler.local.jsonc
+pnpm exec wrangler secret put SETUP_SECRET --config wrangler.local.jsonc
+pnpm exec wrangler deploy --config wrangler.local.jsonc
 ```
 
 `SETUP_SECRET` 使用密码管理器生成至少 32 个字符的随机值，通过命令提示输入，不要写进配置文件或提交到仓库。部署后打开 Worker 地址，使用这个密钥建立唯一账号。
@@ -61,7 +61,7 @@ R2 保持私有，不开启 `r2.dev` 或公共自定义域名。附件由 Worker
 
 后续更新代码后重新构建、部署即可，不需要再次初始化数据库。有数据库变更时，先备份，再按对应迁移更新。已有早期版本若缺少分享表，使用 `migrations/0002_shares.sql`；全新数据库的 `schema.sql` 已包含该表。
 
-如使用 Cloudflare 的 Git 构建集成，选择此仓库的根目录，构建命令为 `pnpm build`，部署命令为 `pnpm exec wrangler deploy`。D1、R2 和建号密钥仍需先完成配置。
+后续在本机更新时，运行 `pnpm build`，再运行 `pnpm exec wrangler deploy --config wrangler.local.jsonc`。本地配置要单独保管。若改用 Cloudflare Git 构建集成，需要先在构建环境准备实际绑定配置，不能直接使用仓库里的占位符部署。
 
 ### 部署前需要知道
 
